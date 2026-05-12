@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const connectToDB = require("../src/config/db");
 const authRoutes = require("../src/routes/authRoutes");
 const accountRoutes = require("../src/routes/accountRoutes");
+const transactionRoutes = require("../src/routes/transactionRoutes");
 
 const app = express();
 connectToDB();
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/account", accountRoutes);
+app.use("/api/transaction", transactionRoutes);
 
 app.get("/", (req, res) => {
   res.send("Bank Homepage");
