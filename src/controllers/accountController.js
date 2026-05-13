@@ -6,7 +6,7 @@ const createAccount = async (req, res) => {
     if (isAccount) {
       return res
         .status(401)
-        .json({ success: false, message: "Account Already Exists" });
+        .json({ success: false, message: "Account Already Exists", isAccount });
     }
     const account = await Account.create({ user: user._id });
     res.status(201).json({

@@ -1,8 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const Transaction = require("../models/Transaction");
 
-const protect = async (req, res, next) => {
+const initiateFunds = async (req, res, next) => {
   const token = req.headers.cookies || req.headers.authorization?.split(" ")[1];
   if (!token) {
     return res.status(401).json({
@@ -12,13 +11,14 @@ const protect = async (req, res, next) => {
   }
   try {
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
-      return res.status(401).json({
+    const user = await User.findById(decoded.id).select("+systemUser");
+    if (!user || !user.systemUser) {
+      return res.status(403).json({
         success: false,
-        message: "Unauthorized Access, Invalid token format",
+        message: "Forbidden Access, Not a system user",
       });
     }
-    req.user = await User.findById(decoded.id).select("-password -systemUser");
+    req.systemUser = user;
     next();
   } catch (error) {
     return res.status(401).json({
@@ -28,4 +28,6 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+module.exports = {
+  initiateFunds,
+};
