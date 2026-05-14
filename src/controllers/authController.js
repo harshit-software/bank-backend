@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const BlacklistToken = require("../models/BlacklistToken");
 const { sendEmail } = require("../services/email");
 
 const generateToken = (id) => {
@@ -98,4 +99,33 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const logoutUser = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "No token found",
+      });
+    }
+
+    // Add the token to the blacklist
+    await BlacklistToken.create({ token });
+
+    // Clear the cookie
+    res.clearCookie("token");
+
+    res.status(200).json({
+      success: true,
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { registerUser, loginUser, logoutUser };

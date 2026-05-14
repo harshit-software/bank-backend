@@ -23,4 +23,13 @@ const createAccount = async (req, res) => {
   }
 };
 
-module.exports = { createAccount };
+const getAccountBalance = async (req, res) => {
+  const account = await Account.findOne({ user: req.user });
+  const balance = await account.getBalance();
+  res.status(200).json({
+    success: true,
+    message: "Account Balance Retrieved Successfully",
+    balance,
+  });
+};
+module.exports = { createAccount, getAccountBalance };

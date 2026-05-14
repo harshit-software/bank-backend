@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
+const BlacklistToken = require("../models/BlacklistToken");
 
 const protect = async (req, res, next) => {
   const token = req.headers.cookies || req.headers.authorization?.split(" ")[1];
@@ -10,6 +11,14 @@ const protect = async (req, res, next) => {
       message: "Unauthorized Access, Missing token",
     });
   }
+  const isBlacklisted = await BlacklistToken.findOne({ token });
+  if (isBlacklisted) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized Access, Token is blacklisted",
+    });
+  }
+
   try {
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
